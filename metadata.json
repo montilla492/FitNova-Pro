@@ -1,0 +1,5 @@
+{
+  "name": "FitNova Pro",
+  "description": "Una aplicación premium de fitness y bienestar con seguimiento de rutinas, análisis de progreso asistido por IA, mapas de gimnasios y comunidad social.",
+  "requestFramePermissions": ["geolocation"]
+}

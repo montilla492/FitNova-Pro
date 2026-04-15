@@ -1,0 +1,117 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User profile data including fitness stats and preferences",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "activeGoal": { "type": "string" },
+        "streak": { "type": "number" },
+        "level": { "type": "string" },
+        "weight": { "type": "number" },
+        "height": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "Routine": {
+      "title": "Workout Routine",
+      "description": "A set of exercises for a specific workout session",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "type": { "type": "string", "enum": ["Fuerza", "Resistencia", "Hipertrofia"] },
+        "duration": { "type": "number" },
+        "days": { "type": "array", "items": { "type": "string" } },
+        "exercises": { "type": "array", "items": { "$ref": "Exercise" } }
+      }
+    },
+    "Exercise": {
+      "title": "Exercise Detail",
+      "description": "Details of a specific exercise within a routine",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "series": { "type": "number" },
+        "reps": { "type": "number" },
+        "weight": { "type": "number" },
+        "rest": { "type": "number" },
+        "tempo": { "type": "string" },
+        "rpe": { "type": "number" }
+      }
+    },
+    "CommunityPost": {
+      "title": "Community Post",
+      "description": "A social post shared by a user",
+      "type": "object",
+      "properties": {
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "authorPhoto": { "type": "string" },
+        "content": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "likes": { "type": "number" },
+        "category": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Gym": {
+      "title": "Gym Location",
+      "description": "Information about a gym or fitness center",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "address": { "type": "string" },
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" },
+        "rating": { "type": "number" },
+        "type": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "isPremium": { "type": "boolean" },
+        "features": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "ProgressLog": {
+      "title": "Progress Log",
+      "description": "Daily or periodic tracking of vitals and stats",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "weight": { "type": "number" },
+        "calories": { "type": "number" },
+        "steps": { "type": "number" },
+        "heartRate": { "type": "number" },
+        "sleepHours": { "type": "number" },
+        "waterLiters": { "type": "number" }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile data"
+    },
+    "/routines/{routineId}": {
+      "schema": "Routine",
+      "description": "Workout routines"
+    },
+    "/posts/{postId}": {
+      "schema": "CommunityPost",
+      "description": "Social feed posts"
+    },
+    "/gyms/{gymId}": {
+      "schema": "Gym",
+      "description": "Gym locations"
+    },
+    "/progress/{logId}": {
+      "schema": "ProgressLog",
+      "description": "User progress tracking"
+    }
+  }
+}

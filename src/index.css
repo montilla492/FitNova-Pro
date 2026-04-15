@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-headline: "Space Grotesk", sans-serif;
+  
+  --color-primary: #f6ffc0;
+  --color-primary-container: #daf900;
+  --color-secondary: #669dff;
+  --color-tertiary: #fdd73e;
+  --color-background: #0e0e0e;
+  --color-surface: #0e0e0e;
+  --color-surface-container-low: #131313;
+  --color-surface-container-high: #201f1f;
+  --color-surface-container-highest: #262626;
+  --color-on-surface: #ffffff;
+  --color-on-surface-variant: #adaaaa;
+  --color-error: #ff7351;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-on-surface font-sans;
+  }
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.ring-gradient-primary {
+  stroke: #daf900;
+  stroke-dasharray: 283;
+  stroke-dashoffset: 70;
+  stroke-linecap: round;
+}
+
+.ring-gradient-secondary {
+  stroke: #669dff;
+  stroke-dasharray: 220;
+  stroke-dashoffset: 100;
+  stroke-linecap: round;
+}
+
+.ring-gradient-tertiary {
+  stroke: #fdd73e;
+  stroke-dasharray: 157;
+  stroke-dashoffset: 40;
+  stroke-linecap: round;
+}

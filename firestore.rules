@@ -1,0 +1,166 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: users
+// Document ID: {userId} (Matches auth.uid)
+// Fields:
+//   - uid: string (required)
+//   - displayName: string
+//   - email: string (required)
+//   - photoURL: string
+//   - activeGoal: string
+//   - streak: number
+//   - level: string
+//   - weight: number
+//   - height: number
+//   - createdAt: timestamp
+//
+// Collection: routines
+// Document ID: {routineId}
+// Fields:
+//   - userId: string (required, matches author)
+//   - title: string (required, max 100 chars)
+//   - type: string (enum: Fuerza, Resistencia, Hipertrofia)
+//   - duration: number (positive)
+//   - days: list of strings
+//   - exercises: list of maps (Exercise schema)
+//
+// Collection: posts
+// Document ID: {postId}
+// Fields:
+//   - authorId: string (required, matches author)
+//   - authorName: string (required)
+//   - authorPhoto: string
+//   - content: string (required, max 2000 chars)
+//   - imageUrl: string
+//   - likes: number
+//   - category: string
+//   - createdAt: timestamp
+//
+// Collection: gyms
+// Document ID: {gymId}
+// Fields:
+//   - name: string (required)
+//   - address: string
+//   - latitude: number
+//   - longitude: number
+//   - rating: number
+//   - type: string
+//   - imageUrl: string
+//   - isPremium: bool
+//   - features: list of strings
+//
+// Collection: progress
+// Document ID: {logId}
+// Fields:
+//   - userId: string (required, matches author)
+//   - date: string (ISO 8601)
+//   - weight: number
+//   - calories: number
+//   - steps: number
+//   - heartRate: number
+//   - sleepHours: number
+//   - waterLiters: number
+//
+// ===============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.userId || request.auth.uid == resource.data.authorId;
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidString(field, min, max) {
+      return request.resource.data[field] is string && 
+             request.resource.data[field].size() >= min && 
+             request.resource.data[field].size() <= max;
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return data.uid == request.auth.uid &&
+             isValidEmail(data.email) &&
+             (data.displayName == null || data.displayName is string);
+    }
+
+    function isValidRoutine(data) {
+      return data.userId == request.auth.uid &&
+             data.title is string && data.title.size() > 0 && data.title.size() <= 100 &&
+             data.type in ['Fuerza', 'Resistencia', 'Hipertrofia'] &&
+             data.duration is number && data.duration >= 0;
+    }
+
+    function isValidPost(data) {
+      return data.authorId == request.auth.uid &&
+             data.content is string && data.content.size() > 0 && data.content.size() <= 2000 &&
+             data.authorName is string;
+    }
+
+    function isValidProgress(data) {
+      return data.userId == request.auth.uid &&
+             data.date is string;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isAuthenticated(); // Allow reading profiles for community
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isValidUser(request.resource.data);
+    }
+
+    match /routines/{routineId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidRoutine(request.resource.data);
+      allow update: if isDocOwner() && isValidRoutine(request.resource.data);
+      allow delete: if isDocOwner();
+    }
+
+    match /posts/{postId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidPost(request.resource.data);
+      allow update: if isDocOwner() && isValidPost(request.resource.data);
+      allow delete: if isDocOwner();
+    }
+
+    match /gyms/{gymId} {
+      allow read: if true; // Publicly viewable gyms
+      allow write: if false; // Only admin (manual) can write gyms for now
+    }
+
+    match /progress/{logId} {
+      allow read: if isDocOwner();
+      allow create: if isAuthenticated() && isValidProgress(request.resource.data);
+      allow update: if isDocOwner() && isValidProgress(request.resource.data);
+      allow delete: if isDocOwner();
+    }
+  }
+}
